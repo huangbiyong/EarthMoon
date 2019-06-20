@@ -59,6 +59,24 @@ static const GLfloat SceneMoonDistanceFromEarth = 1.5f;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    //1.新建OpenGL ES 上下文
+    [self setupContext];
+    
+    //开启深度测试
+    glEnable(GL_DEPTH_TEST);
+    
+    //3.创建GLKBaseEffect 只能有3个光照、2个纹理
+    [self setupBaseEffect];
+    
+    //6.设置清屏颜色
+    GLKVector4 colorVector4 = GLKVector4Make(0.0f, 0.0f, 0.0f, 1.0f);
+    [self setClearColor:colorVector4];
+    
+    //7.顶点数组
+    [self bufferData];
+}
+
+- (void)setupContext {
     
     //1.新建OpenGL ES 上下文
     self.mContext = [[EAGLContext alloc]initWithAPI:kEAGLRenderingAPIOpenGLES2];
@@ -71,10 +89,10 @@ static const GLfloat SceneMoonDistanceFromEarth = 1.5f;
     
     [EAGLContext setCurrentContext:self.mContext];
     
-    //开启深度测试
-    glEnable(GL_DEPTH_TEST);
+}
+
+- (void)setupBaseEffect {
     
-    //3.创建GLKBaseEffect 只能有3个光照、2个纹理
     self.baseEffect = [[GLKBaseEffect alloc]init];
     
     //配置baseEffect光照信息
@@ -88,14 +106,8 @@ static const GLfloat SceneMoonDistanceFromEarth = 1.5f;
     
     //5.设置模型矩形 -5.0f表示往屏幕内移动-5.0f距离
     self.baseEffect.transform.modelviewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -5.0f);
-    
-    //6.设置清屏颜色
-    GLKVector4 colorVector4 = GLKVector4Make(0.0f, 0.0f, 0.0f, 1.0f);
-    [self setClearColor:colorVector4];
-    
-    //7.顶点数组
-    [self bufferData];
 }
+
 
 -(void)bufferData
 {
@@ -234,16 +246,13 @@ static const GLfloat SceneMoonDistanceFromEarth = 1.5f;
     [AGLKVertexAttribArrayBuffer drawPreparedArraysWithMode:GL_TRIANGLES startVertexIndex:0 numberOfVertices:sphereNumVerts];
     
     //绘制完毕，则出栈
-
     GLKMatrixStackPop(self.modelViewMatrixStack);
     
-
     self.baseEffect.transform.modelviewMatrix = GLKMatrixStackGetMatrix4(self.modelViewMatrixStack);
     
 }
 
--(void)drawMoon
-{
+-(void)drawMoon {
     // 绘制6个月球
     for (NSInteger i=0; i<6; i++) {
         
@@ -259,6 +268,7 @@ static const GLfloat SceneMoonDistanceFromEarth = 1.5f;
         //自转
         GLKMatrixStackRotate(self.modelViewMatrixStack, GLKMathDegreesToRadians(self.moonRotationAngleDegress), 0.0f, 1.0f, 0.0f);
         
+        // 设置不同月球的间距
         float xDistance = SceneMoonDistanceFromEarth * cos(i * GLKMathDegreesToRadians(60));
         float zDistance = SceneMoonDistanceFromEarth * sin(i * GLKMathDegreesToRadians(60));
         
@@ -278,7 +288,6 @@ static const GLfloat SceneMoonDistanceFromEarth = 1.5f;
         GLKMatrixStackPop(self.modelViewMatrixStack);
     }
     
-
     self.baseEffect.transform.modelviewMatrix = GLKMatrixStackGetMatrix4(self.modelViewMatrixStack);
 }
 
